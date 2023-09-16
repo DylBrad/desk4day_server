@@ -12,18 +12,25 @@ router.post('/', async (req, res) => {
   try {
     const user = await User.findOne({ email });
 
-    const passwordCheck = await bcrypt.compare(password, user.password);
+    console.log('USER:', user);
 
-    if (user && passwordCheck) {
-      const token = jwt.sign(user.toJSON(), email, {
-        expiresIn: 60 * 24,
-      });
-      // eslint-disable-next-line no-underscore-dangle
-      res.status(201).json({ token });
+    if (user) {
+      const passwordCheck = await bcrypt.compare(password, user.password);
+
+      if (passwordCheck) {
+        const token = jwt.sign({ userId: user._id }, 'your-secret-key', {
+          expiresIn: '1d', // 1 day expiration
+        });
+        res.status(201).json({ token });
+      } else {
+        res.status(400).send({ error: 'Whoops! Password incorrect.' });
+      }
+    } else {
+      res.status(400).send({ error: "Whoops! User does'nt exist." });
     }
-    res.status(400).send('Whoops! Login details incorrect.');
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).send({ error: 'Server Error' });
   }
 });
 
