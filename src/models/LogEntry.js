@@ -13,7 +13,7 @@ const logEntrySchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: false,
+      required: true,
     },
     comments: [],
     image: String,
@@ -41,6 +41,7 @@ const logEntrySchema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
+    establishment: String,
   },
   {
     timestamps: true,
