@@ -3,6 +3,7 @@ const { Router } = require('express');
 
 const UserPost = require('../models/Post');
 const Users = require('../models/User');
+const { findOneAndUpdate } = require('../models/LogEntry');
 
 const router = Router();
 
@@ -34,12 +35,23 @@ router.post('/', async (req, res, next) => {
     const user = await Users.findOne({ _id: req.body.author });
     // eslint-disable-next-line no-underscore-dangle
     user.posts.push(createdEntry._id);
-    const updatedUser = await user.save();
+    await user.save();
     res.json(createdEntry);
   } catch (error) {
     if (error.constructor.name === 'ValidationError') {
       res.status(422);
     }
+    next(error);
+  }
+});
+
+router.put('/', async (req, res, next) => {
+  try {
+    const filter = req.query;
+    const updates = req.body;
+    const updatedPost = await UserPost.findOneAndUpdate(filter, updates);
+    res.json(updatedPost);
+  } catch (error) {
     next(error);
   }
 });
