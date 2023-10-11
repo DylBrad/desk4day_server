@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
     posts: [{ type: Schema.Types.ObjectId, ref: 'UserPost' }],
     logs: [{ type: Schema.Types.ObjectId, ref: 'LogEntry' }],
     likedPosts: [{ type: Schema.Types.ObjectId, ref: 'UserPost' }],

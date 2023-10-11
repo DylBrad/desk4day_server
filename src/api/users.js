@@ -2,8 +2,13 @@
 const { Router } = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const path = require('path');
 
 const User = require('../models/User');
+const Token = require('../models/Token');
+
+const sendEmail = require('../utils/sendEmail');
 
 const router = Router();
 
@@ -12,6 +17,41 @@ router.get('/', async (req, res, next) => {
     const id = req.query._id;
     const users = await User.findOne({ _id: id });
     res.json(users);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/email', async (req, res, next) => {
+  try {
+    const { email } = req.query;
+    const users = await User.findOne({ email: email });
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/send-email', async (req, res, next) => {
+  try {
+    const { email } = req.query;
+    const { id } = req.query;
+
+    const verificationToken = await new Token({
+      userId: id,
+      token: crypto.randomBytes(32).toString('hex'),
+    }).save();
+
+    // POTENTIAL ISSUE: If a token  for the user id already
+    // exists for some reason, the new token cannot be created.
+    // Check if token already exists, and delete it before sending new verification email
+
+    const url = `${process.env.BASE_URL}/api/users/email-verify/${id}/verify/${verificationToken.token}`;
+
+    console.log('---->>>> URL:', url);
+    await sendEmail(email, 'Verify email', url);
+    // respond with the created user obj to be used as cookies in frontend
+    res.json({ verificationToken });
   } catch (error) {
     next(error);
   }
@@ -74,6 +114,14 @@ router.post('/', async (req, res, next) => {
       expiresIn: 60 * 24,
     });
 
+    // Send verification email
+    const verificationToken = await new Token({
+      userId: createdUser._id,
+      token: crypto.randomBytes(32).toString('hex'),
+    }).save();
+    const url = `${process.env.BASE_URL}/api/users/email-verify/${createdUser._id}/verify/${verificationToken.token}`;
+
+    await sendEmail(createdUser.email, 'Verify email', url);
     // respond with the created user obj to be used as cookies in frontend
     res.json({ token });
   } catch (error) {
@@ -83,6 +131,38 @@ router.post('/', async (req, res, next) => {
     next(error);
   }
   return 'success';
+});
+
+router.get('/email-verify/:id/verify/:token', async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id });
+
+    if (!user) {
+      return res.status(400).send({ message: 'User does not exist' });
+    }
+
+    const token = await Token.findOne({
+      userId: user._id,
+      token: req.params.token,
+    });
+
+    if (!token) {
+      return res.status(400).sendFile('invalidLink.html', {
+        root: path.join(__dirname, '../views'),
+      });
+    }
+
+    const filter = { _id: user._id };
+    const update = { verified: true };
+
+    await User.findOneAndUpdate(filter, update);
+
+    await token.remove();
+
+    return res.status(200).send({ message: 'Email verified' });
+  } catch (error) {
+    return res.status(500).send({ message: 'Server Error' });
+  }
 });
 
 module.exports = router;
