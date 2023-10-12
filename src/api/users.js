@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const path = require('path');
+const fs = require('fs');
 
 const User = require('../models/User');
 const Token = require('../models/Token');
@@ -82,6 +83,7 @@ router.put('/edit-profile', async (req, res, next) => {
   }
 });
 
+// Create user and send first email verification link
 router.post('/', async (req, res, next) => {
   try {
     const user = new User(req.body);
@@ -133,11 +135,10 @@ router.post('/', async (req, res, next) => {
   return 'success';
 });
 
+// Verify email when link is clicked
 router.get('/email-verify/:id/verify/:token', async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id });
-
-    console.log('--->>> USER: ', user);
 
     if (!user) {
       return res.status(400).send({ message: 'User does not exist' });
@@ -148,14 +149,6 @@ router.get('/email-verify/:id/verify/:token', async (req, res) => {
       token: req.params.token,
     });
 
-    console.log('--->>> TOKEN', token);
-
-    if (!token) {
-      return res.status(400).sendFile('invalidLink.html', {
-        root: path.join(__dirname, '../views'),
-      });
-    }
-
     const filter = { _id: user._id };
     const update = { verified: true };
 
@@ -163,7 +156,16 @@ router.get('/email-verify/:id/verify/:token', async (req, res) => {
 
     await token.remove();
 
-    return res.status(200).send({ message: 'Email verified' });
+    // Read the HTML file
+    const htmlPath = path.join(__dirname, '../views', 'emailVerified.html');
+    let htmlContent = fs.readFileSync(htmlPath, 'utf-8');
+
+    // Replace the placeholder with the actual URL
+    const homepageUrl = process.env.CORS_ORIGIN;
+    htmlContent = htmlContent.replace('__HOMEPAGE_URL__', homepageUrl);
+
+    // Send the modified HTML content
+    return res.status(200).send(htmlContent);
   } catch (error) {
     return res.status(500).send({ message: 'Server Error' });
   }
