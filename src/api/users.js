@@ -161,7 +161,7 @@ router.get('/email-verify/:id/verify/:token', async (req, res) => {
     let htmlContent = fs.readFileSync(htmlPath, 'utf-8');
 
     // Replace the placeholder with the actual URL
-    const homepageUrl = process.env.CORS_ORIGIN;
+    const homepageUrl = process.env.NEXT_BASE_URL;
     htmlContent = htmlContent.replace('__HOMEPAGE_URL__', homepageUrl);
 
     // Send the modified HTML content
