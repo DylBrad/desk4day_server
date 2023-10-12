@@ -137,6 +137,8 @@ router.get('/email-verify/:id/verify/:token', async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.params.id });
 
+    console.log('--->>> USER: ', user);
+
     if (!user) {
       return res.status(400).send({ message: 'User does not exist' });
     }
@@ -145,6 +147,8 @@ router.get('/email-verify/:id/verify/:token', async (req, res) => {
       userId: user._id,
       token: req.params.token,
     });
+
+    console.log('--->>> TOKEN', token);
 
     if (!token) {
       return res.status(400).sendFile('invalidLink.html', {
