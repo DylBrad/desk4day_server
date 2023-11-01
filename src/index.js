@@ -9,6 +9,7 @@ const logs = require('./api/logs');
 const users = require('./api/users');
 const login = require('./api/login');
 const posts = require('./api/posts');
+const postComments = require('./api/postComments');
 
 const app = express();
 
@@ -48,6 +49,9 @@ app.use('/api/login', login);
 
 // posts
 app.use('/api/posts', posts);
+
+// post comments
+app.use('/api/postComments', postComments);
 
 app.use(notFound);
 app.use(errorHandler);

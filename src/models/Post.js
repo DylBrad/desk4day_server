@@ -11,12 +11,12 @@ const userPostSchema = new mongoose.Schema(
       required: true,
     },
     author: String,
-    authorImage: String,
     likes: {
       type: Number,
       min: 0,
       default: 0,
     },
+    comments: [{ author: String, content: String }],
   },
   {
     timestamps: true,
