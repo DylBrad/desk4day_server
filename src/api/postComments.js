@@ -2,6 +2,7 @@
 const { Router } = require('express');
 
 const UserPost = require('../models/Post');
+const User = require('../models/User');
 
 const router = Router();
 
@@ -26,9 +27,22 @@ router.get('/', async (req, res, next) => {
   try {
     const postId = req.query._id;
     const post = await UserPost.findOne({ _id: postId });
-    const allComments = post.comments;
+    const allComments = post.comments.reverse();
+
     if (allComments) {
-      res.json(allComments);
+      const commentsWithAuthorPics = await Promise.all(
+        allComments.map(async (comment) => {
+          const author = await User.findOne({ _id: comment.author });
+          return {
+            content: comment.content,
+            authorPic: author.profile_pic,
+            // add any other properties needed in the future
+          };
+        }),
+      );
+      console.log('COOMMEMEENNTTTSSS:', commentsWithAuthorPics[0].authorPic);
+
+      res.json(commentsWithAuthorPics);
     } else {
       res.json(null);
     }
