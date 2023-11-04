@@ -16,8 +16,23 @@ const router = Router();
 router.get('/', async (req, res, next) => {
   try {
     const id = req.query._id;
-    const users = await User.findOne({ _id: id });
-    res.json(users);
+    const user = await User.findOne({ _id: id });
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
+});
+router.get('/pub', async (req, res, next) => {
+  try {
+    const id = req.query._id;
+    const user = await User.findOne({ _id: id }).lean();
+    console.log('----->>>>> BEFORE', user);
+    delete user.password;
+    delete user.email;
+    delete user.verified;
+    delete user.updatedAt;
+    console.log('----->>>>> AFTER', user);
+    res.json(user);
   } catch (error) {
     next(error);
   }

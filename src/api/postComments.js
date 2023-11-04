@@ -21,4 +21,22 @@ router.put('/', async (req, res, next) => {
   }
 });
 
+// Get most recent post to display on newsfeed
+router.get('/newsfeedPost', async (req, res, next) => {
+  try {
+    const postId = req.query._id;
+    const post = await UserPost.findOne({ _id: postId });
+
+    const comment = post.comments[post.comments.length - 1];
+
+    if (comment) {
+      res.json(comment);
+    } else {
+      res.json(null);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
