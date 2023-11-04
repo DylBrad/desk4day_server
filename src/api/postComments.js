@@ -21,6 +21,22 @@ router.put('/', async (req, res, next) => {
   }
 });
 
+// get all comments
+router.get('/', async (req, res, next) => {
+  try {
+    const postId = req.query._id;
+    const post = await UserPost.findOne({ _id: postId });
+    const allComments = post.comments;
+    if (allComments) {
+      res.json(allComments);
+    } else {
+      res.json(null);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get most recent post to display on newsfeed
 router.get('/newsfeedPost', async (req, res, next) => {
   try {
