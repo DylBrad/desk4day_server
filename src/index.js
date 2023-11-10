@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const { notFound, errorHandler } = require('./middlewares');
 require('dotenv').config();
 const logs = require('./api/logs');
+const logReviews = require('./api/logReviews');
 const users = require('./api/users');
 const login = require('./api/login');
 const posts = require('./api/posts');
@@ -40,6 +41,7 @@ app.get('/', (req, res) => {
 
 // marker routes here
 app.use('/api/logs', logs);
+app.use('/api/logReviews', logReviews);
 
 // user routes here
 app.use('/api/users', users);

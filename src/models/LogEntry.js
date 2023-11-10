@@ -5,6 +5,18 @@ const requiredNumber = {
   required: true,
 };
 
+const reviewSchema = new mongoose.Schema(
+  {
+    reviewAuthor: String,
+    reviewRating: Number,
+    reviewContent: String,
+    reviewImage: String,
+  },
+  {
+    timestamps: true,
+  },
+);
+
 const logEntrySchema = new mongoose.Schema(
   {
     title: {
@@ -15,7 +27,8 @@ const logEntrySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    comments: [],
+    reviews: [reviewSchema],
+    // Make image an array?? [author, string, createdAt]
     image: String,
     authorId: {
       type: String,
@@ -23,7 +36,7 @@ const logEntrySchema = new mongoose.Schema(
     rating: {
       type: Number,
       min: 0,
-      max: 10,
+      max: 5,
       default: 0,
     },
     latitude: {
