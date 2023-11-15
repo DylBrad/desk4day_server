@@ -37,6 +37,7 @@ router.get('/', async (req, res, next) => {
             content: review.reviewContent,
             image: review.reviewImage,
             authorImage: author.profile_pic,
+            rating: review.reviewRating,
           };
         }),
       );
