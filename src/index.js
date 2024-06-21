@@ -27,7 +27,7 @@ app.use(helmet());
 app.use(
   cors({
     // Only requests coming from here can reach the backend
-    origin: process.env.CORS_ORIGIN,
+    origin: 'https://dylbrad.github.io',
   }),
 );
 
