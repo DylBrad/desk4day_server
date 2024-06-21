@@ -14,6 +14,8 @@ router.post('/', async (req, res, next) => {
 
     logEntry.reviews.push(reviewData);
 
+    console.log('------->>>>>>>', logEntry);
+
     const updatedLogEntry = logEntry.save();
 
     res.json(updatedLogEntry);
